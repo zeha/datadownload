@@ -149,6 +149,36 @@ accountPageCallback = function(status) {
   gotoLink('a[id="GIRO_KONTO_UMSATZSUCHE_ID"]', listPageCallback);
 };
 
+overviewPageCallback = function(status) {
+  console.log('overviewPageCallback -- ', page.url);
+  debugRender();
+
+  // find account link and click it
+  var links = page.evaluate(function() {
+    var elements = document.querySelectorAll('form[name="LABEL_NBMAIN_kontouebersicht"] a');
+    var links = [];
+    for (var i = 0; i < elements.length; i++) {
+      links.push({text: elements[i].textContent.trim(), href: elements[i].href});
+    }
+    return links;
+  });
+
+  var link = null;
+  for (var i = 0; i < links.length; i++) {
+    if (links[i].text == account_number) {
+      link = links[i];
+      break;
+    }
+  }
+
+  if (!link) {
+    console.error("Account Number not found in navigation list");
+    phantom.exit(1);
+  }
+  console.log('Account page link:', link.href);
+  page.open(link.href, accountPageCallback);
+};
+
 tryLoginCallback = function(status) {
   console.log('tryLoginCallback -- ', page.url);
   debugRender();
@@ -158,26 +188,10 @@ tryLoginCallback = function(status) {
   if (page.url.indexOf('/sPortal/sportal.portal') == -1) {
     return; // not yet logged in
   }
+  // now logged in. go to finance overview page in case this is not the default view.
   console.log('Logged in.');
   page.onLoadFinished = null;
-  // now logged in
-  // find account link and click it
-  var link = page.evaluate(function(account_number) {
-    var links = document.querySelectorAll('.subnav a');
-    for (var i = 0; i < links.length; i++) {
-      var link = links[i];
-      if (link.textContent.trim() == account_number) {
-        return link.href;
-      }
-    }
-    return null;
-  }, account_number);
-  if (link == null) {
-    console.error("Account Number not found in navigation list");
-    phantom.exit(1);
-  }
-  console.log('Account page link:', link);
-  page.open(link, accountPageCallback);
+  gotoLink('a[id="FINANZ_UEBERSICHT"]', overviewPageCallback);
 };
 
 loginCallback = function(status) {
