@@ -82,11 +82,6 @@ function getDownloadParams(page, event_value) {
   }, event_value);
 }
 
-doneCallback = function(status) {
-  console.log('doneCallback -- ', status, ' -> ', page.url);
-  debugRender();
-};
-
 downloadFinishedCallback = function(status) {
   console.log('downloadFinishedCallback -- ', status, ' -> ', page.url);
   debugRender();
