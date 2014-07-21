@@ -106,7 +106,14 @@ downloadFinishedCallback = function(status) {
     }, download);
     fs.write(outputfilename, data);
     console.info('Done, wrote data to ' + outputfilename + '.');
-    phantom.exit(0);
+    console.log('Logging out...');
+    page.onLoadFinished = undefined;
+    page.evaluate(function() {
+      document.querySelector('input[name="logout"]').click();
+    });
+    window.setTimeout(function() {
+      phantom.exit(0);
+    }, 150)
   }, 1000);
 };
 
